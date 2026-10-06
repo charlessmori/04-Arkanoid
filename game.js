@@ -17,7 +17,7 @@ const MAX_BOUNCE_ANGLE = 60; // grados respecto a la vertical
 const MAX_DT = 1 / 30; // limita el delta para evitar saltos
 
 const state = {
-  phase: 'ready', // 'ready' | 'playing'
+  phase: 'ready', // 'ready' | 'playing' | 'gameover' | 'won'
   lives: 3,
   ball: { x: 0, y: 0, vx: 0, vy: 0 },
   paddle: { x: 340 }, // esquina izquierda; y fija en PADDLE.y
@@ -60,7 +60,10 @@ window.addEventListener('keydown', (e) => {
   keys[e.code] = true;
   if (e.code === 'Space') {
     e.preventDefault();
-    if (!e.repeat) launchBall();
+    if (!e.repeat) {
+      if (state.phase === 'gameover' || state.phase === 'won') restartGame();
+      else launchBall();
+    }
   }
 });
 window.addEventListener('keyup', (e) => { keys[e.code] = false; });
@@ -156,6 +159,19 @@ function bounceOffBlocks() {
 
 function loseLife() {
   state.lives -= 1;
+  if (state.lives <= 0) {
+    state.phase = 'gameover';
+    state.ball.vx = 0;
+    state.ball.vy = 0;
+    return;
+  }
+  state.phase = 'ready';
+  stickBallToPaddle();
+}
+
+function restartGame() {
+  state.lives = 3;
+  state.blocks = createBlocks();
   state.phase = 'ready';
   stickBallToPaddle();
 }
@@ -178,7 +194,13 @@ function update(dt) {
     bounceOffWalls();
     bounceOffPaddle();
     bounceOffBlocks();
-    if (state.ball.y > CANVAS_H) loseLife();
+    if (state.blocks.every((block) => !block.alive)) {
+      state.phase = 'won';
+      state.ball.vx = 0;
+      state.ball.vy = 0;
+    } else if (state.ball.y > CANVAS_H) {
+      loseLife();
+    }
   }
 }
 
@@ -196,6 +218,15 @@ function draw() {
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
   ctx.fillText('Vidas: ' + state.lives, 10, 10);
+  if (state.phase === 'gameover' || state.phase === 'won') {
+    ctx.fillStyle = '#fff';
+    ctx.font = '48px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(state.phase === 'won' ? 'Has ganado' : 'Game over', CANVAS_W / 2, CANVAS_H / 2);
+    ctx.font = '20px sans-serif';
+    ctx.fillText('Pulsa Espacio para jugar de nuevo', CANVAS_W / 2, CANVAS_H / 2 + 50);
+  }
   drawSprite(ctx, 'paddle', state.paddle.x, PADDLE.y, PADDLE.w, PADDLE.h);
 }
 
