@@ -45,6 +45,8 @@ const ctx = canvas.getContext('2d');
 
 const bounceSound = new Audio('assets/sounds/ball-bounce.mp3');
 
+const breakSound = new Audio('assets/sounds/break-sound.mp3');
+
 function playSound(sound) {
   sound.currentTime = 0;
   sound.play().catch(() => {}); // el navegador puede bloquear el audio sin interacción
@@ -125,6 +127,32 @@ function bounceOffPaddle() {
   playSound(bounceSound);
 }
 
+function bounceOffBlocks() {
+  const ball = state.ball;
+  for (const block of state.blocks) {
+    if (!block.alive) continue;
+    const overlapX = Math.min(ball.x + BALL_SIZE - block.x, block.x + BLOCK_W - ball.x);
+    const overlapY = Math.min(ball.y + BALL_SIZE - block.y, block.y + BLOCK_H - ball.y);
+    if (overlapX <= 0 || overlapY <= 0) continue;
+
+    block.alive = false;
+    const ballCx = ball.x + BALL_SIZE / 2;
+    const ballCy = ball.y + BALL_SIZE / 2;
+    // rebota por el eje de menor penetración
+    if (overlapX < overlapY) {
+      const dir = ballCx < block.x + BLOCK_W / 2 ? -1 : 1;
+      ball.vx = Math.abs(ball.vx) * dir;
+      ball.x += overlapX * dir;
+    } else {
+      const dir = ballCy < block.y + BLOCK_H / 2 ? -1 : 1;
+      ball.vy = Math.abs(ball.vy) * dir;
+      ball.y += overlapY * dir;
+    }
+    playSound(breakSound);
+    return; // un bloque por frame
+  }
+}
+
 function clampPaddle() {
   state.paddle.x = Math.max(0, Math.min(CANVAS_W - PADDLE.w, state.paddle.x));
 }
@@ -142,6 +170,7 @@ function update(dt) {
     state.ball.y += state.ball.vy * dt;
     bounceOffWalls();
     bounceOffPaddle();
+    bounceOffBlocks();
   }
 }
 
