@@ -12,6 +12,7 @@ const PADDLE = { w: 120, h: 16, y: 560, speed: 600 }; // speed: teclado, px/s
 
 const BALL_SIZE = 16;
 const BALL_SPEED = 420; // módulo constante, px/s
+const MAX_BOUNCE_ANGLE = 60; // grados respecto a la vertical
 
 const MAX_DT = 1 / 30; // limita el delta para evitar saltos
 
@@ -41,6 +42,13 @@ state.blocks = createBlocks();
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
+
+const bounceSound = new Audio('assets/sounds/ball-bounce.mp3');
+
+function playSound(sound) {
+  sound.currentTime = 0;
+  sound.play().catch(() => {}); // el navegador puede bloquear el audio sin interacción
+}
 
 const keys = {};
 let lastTime = 0;
@@ -77,6 +85,46 @@ function launchBall() {
   state.ball.vy = -BALL_SPEED;
 }
 
+function bounceOffWalls() {
+  const ball = state.ball;
+  let bounced = false;
+  if (ball.x < 0) {
+    ball.x = 0;
+    ball.vx = Math.abs(ball.vx);
+    bounced = true;
+  } else if (ball.x + BALL_SIZE > CANVAS_W) {
+    ball.x = CANVAS_W - BALL_SIZE;
+    ball.vx = -Math.abs(ball.vx);
+    bounced = true;
+  }
+  if (ball.y < 0) {
+    ball.y = 0;
+    ball.vy = Math.abs(ball.vy);
+    bounced = true;
+  }
+  if (bounced) playSound(bounceSound);
+}
+
+function bounceOffPaddle() {
+  const ball = state.ball;
+  const paddle = state.paddle;
+  const hit =
+    ball.vy > 0 &&
+    ball.x + BALL_SIZE > paddle.x &&
+    ball.x < paddle.x + PADDLE.w &&
+    ball.y + BALL_SIZE > PADDLE.y &&
+    ball.y < PADDLE.y + PADDLE.h;
+  if (!hit) return;
+
+  // -1 en el extremo izquierdo, 0 en el centro, 1 en el extremo derecho
+  const offset = (ball.x + BALL_SIZE / 2 - (paddle.x + PADDLE.w / 2)) / (PADDLE.w / 2);
+  const angle = Math.max(-1, Math.min(1, offset)) * MAX_BOUNCE_ANGLE * Math.PI / 180;
+  ball.vx = BALL_SPEED * Math.sin(angle);
+  ball.vy = -BALL_SPEED * Math.cos(angle);
+  ball.y = PADDLE.y - BALL_SIZE;
+  playSound(bounceSound);
+}
+
 function clampPaddle() {
   state.paddle.x = Math.max(0, Math.min(CANVAS_W - PADDLE.w, state.paddle.x));
 }
@@ -92,6 +140,8 @@ function update(dt) {
   } else if (state.phase === 'playing') {
     state.ball.x += state.ball.vx * dt;
     state.ball.y += state.ball.vy * dt;
+    bounceOffWalls();
+    bounceOffPaddle();
   }
 }
 
