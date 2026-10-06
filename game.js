@@ -18,6 +18,7 @@ const MAX_DT = 1 / 30; // limita el delta para evitar saltos
 
 const state = {
   phase: 'ready', // 'ready' | 'playing'
+  lives: 3,
   ball: { x: 0, y: 0, vx: 0, vy: 0 },
   paddle: { x: 340 }, // esquina izquierda; y fija en PADDLE.y
   blocks: [], // { x, y, color, alive }
@@ -153,6 +154,12 @@ function bounceOffBlocks() {
   }
 }
 
+function loseLife() {
+  state.lives -= 1;
+  state.phase = 'ready';
+  stickBallToPaddle();
+}
+
 function clampPaddle() {
   state.paddle.x = Math.max(0, Math.min(CANVAS_W - PADDLE.w, state.paddle.x));
 }
@@ -171,6 +178,7 @@ function update(dt) {
     bounceOffWalls();
     bounceOffPaddle();
     bounceOffBlocks();
+    if (state.ball.y > CANVAS_H) loseLife();
   }
 }
 
@@ -183,6 +191,11 @@ function draw() {
     }
   }
   drawSprite(ctx, 'ball', state.ball.x, state.ball.y, BALL_SIZE, BALL_SIZE);
+  ctx.fillStyle = '#fff';
+  ctx.font = '20px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText('Vidas: ' + state.lives, 10, 10);
   drawSprite(ctx, 'paddle', state.paddle.x, PADDLE.y, PADDLE.w, PADDLE.h);
 }
 
