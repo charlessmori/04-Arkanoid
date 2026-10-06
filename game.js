@@ -10,9 +10,14 @@ const ROW_COLORS = ['red', 'yellow', 'cyan', 'magenta', 'hotpink', 'green'];
 
 const PADDLE = { w: 120, h: 16, y: 560, speed: 600 }; // speed: teclado, px/s
 
+const BALL_SIZE = 16;
+const BALL_SPEED = 420; // módulo constante, px/s
+
 const MAX_DT = 1 / 30; // limita el delta para evitar saltos
 
 const state = {
+  phase: 'ready', // 'ready' | 'playing'
+  ball: { x: 0, y: 0, vx: 0, vy: 0 },
   paddle: { x: 340 }, // esquina izquierda; y fija en PADDLE.y
   blocks: [], // { x, y, color, alive }
 };
@@ -40,7 +45,13 @@ const ctx = canvas.getContext('2d');
 const keys = {};
 let lastTime = 0;
 
-window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+window.addEventListener('keydown', (e) => {
+  keys[e.code] = true;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (!e.repeat) launchBall();
+  }
+});
 window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
 canvas.addEventListener('mousemove', (e) => {
@@ -49,6 +60,22 @@ canvas.addEventListener('mousemove', (e) => {
   state.paddle.x = mouseX - PADDLE.w / 2;
   clampPaddle();
 });
+
+canvas.addEventListener('mousedown', launchBall);
+
+function stickBallToPaddle() {
+  state.ball.x = state.paddle.x + PADDLE.w / 2 - BALL_SIZE / 2;
+  state.ball.y = PADDLE.y - BALL_SIZE;
+  state.ball.vx = 0;
+  state.ball.vy = 0;
+}
+
+function launchBall() {
+  if (state.phase !== 'ready') return;
+  state.phase = 'playing';
+  state.ball.vx = 0;
+  state.ball.vy = -BALL_SPEED;
+}
 
 function clampPaddle() {
   state.paddle.x = Math.max(0, Math.min(CANVAS_W - PADDLE.w, state.paddle.x));
@@ -59,6 +86,13 @@ function update(dt) {
   const right = keys.ArrowRight || keys.KeyD;
   state.paddle.x += ((right ? 1 : 0) - (left ? 1 : 0)) * PADDLE.speed * dt;
   clampPaddle();
+
+  if (state.phase === 'ready') {
+    stickBallToPaddle();
+  } else if (state.phase === 'playing') {
+    state.ball.x += state.ball.vx * dt;
+    state.ball.y += state.ball.vy * dt;
+  }
 }
 
 function draw() {
@@ -69,6 +103,7 @@ function draw() {
       drawSprite(ctx, 'block_' + block.color, block.x, block.y, BLOCK_W, BLOCK_H);
     }
   }
+  drawSprite(ctx, 'ball', state.ball.x, state.ball.y, BALL_SIZE, BALL_SIZE);
   drawSprite(ctx, 'paddle', state.paddle.x, PADDLE.y, PADDLE.w, PADDLE.h);
 }
 
