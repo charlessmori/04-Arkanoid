@@ -91,11 +91,11 @@ En los tres casos: vidas a 3, bloques regenerados con `createBlocks()`, explosio
 - [x] La velocidad de la bola es la misma antes y después de cada rebote en pala, paredes y bloques, dentro de un mismo nivel.
 - [x] Tras el primer game over de un nivel, Espacio reinicia ese mismo nivel con 3 vidas y bloques completos.
 - [x] Si se pierde esa segunda oportunidad, la pantalla indica la vuelta al nivel 1 y Espacio empieza en el nivel 1 con 6 filas y 420 px/s.
-- [0] Ganar tras una segunda oportunidad sube el nivel con normalidad, y un game over posterior vuelve a dar una segunda oportunidad.
-- [0] Un game over en el nivel 1 también concede una segunda oportunidad en el nivel 1.
-- [0] Recargar la página reinicia en el nivel 1.
-- [0] No hay errores en la consola y el juego sigue sin módulos ES, bundler ni dependencias externas.
-- [0] `git status` no muestra cambios en `assets/`.
+- [x] Ganar tras una segunda oportunidad sube el nivel con normalidad, y un game over posterior vuelve a dar una segunda oportunidad.
+- [x] Un game over en el nivel 1 también concede una segunda oportunidad en el nivel 1.
+- [x] Recargar la página reinicia en el nivel 1.
+- [x] No hay errores en la consola y el juego sigue sin módulos ES, bundler ni dependencias externas.
+- [x] `git status` no muestra cambios en `assets/`.
 
 ## Decisiones
 
