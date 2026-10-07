@@ -55,17 +55,17 @@ Convenciones:
 
 ## Criterios de aceptación
 
-- [ ] Al romper un bloque se ve su explosión en el mismo lugar, con los frames del color de ese bloque.
-- [ ] La animación usa únicamente `EXPLOSION_FRAMES`, `EXPLOSION_DURATION` y `drawFrame` de `assets/spritesheet.js`, y `git status` no muestra cambios en `assets/`.
-- [ ] La animación dura 600 ms (4 frames de 150 ms) y después no queda rastro del bloque.
-- [ ] La bola atraviesa el espacio de una explosión en curso sin rebotar.
-- [ ] Romper varios bloques seguidos muestra varias explosiones a la vez, cada una con su propio avance.
-- [ ] `break-sound.mp3` suena al golpear el bloque, igual que en el SPEC 01.
-- [ ] Al romper el último bloque la bola se detiene y "Has ganado" aparece al terminar su explosión, no antes.
-- [ ] Durante `clearing` no se puede perder una vida ni lanzar la bola.
-- [ ] Si se pierde la última vida con explosiones en curso, estas terminan su animación y aparece "Game over".
-- [ ] Al reiniciar con Espacio no queda ninguna explosión en pantalla y hay 60 bloques.
-- [ ] No hay errores en la consola y el juego sigue sin módulos ES, bundler ni dependencias externas.
+- [x] Al romper un bloque se ve su explosión en el mismo lugar, con los frames del color de ese bloque.
+- [x] La animación usa únicamente `EXPLOSION_FRAMES`, `EXPLOSION_DURATION` y `drawFrame` de `assets/spritesheet.js`, y `git status` no muestra cambios en `assets/`.
+- [x] La animación dura 600 ms (4 frames de 150 ms) y después no queda rastro del bloque.
+- [x] La bola atraviesa el espacio de una explosión en curso sin rebotar.
+- [x] Romper varios bloques seguidos muestra varias explosiones a la vez, cada una con su propio avance.
+- [x] `break-sound.mp3` suena al golpear el bloque, igual que en el SPEC 01.
+- [x] Al romper el último bloque la bola se detiene y "Has ganado" aparece al terminar su explosión, no antes.
+- [x] Durante `clearing` no se puede perder una vida ni lanzar la bola.
+- [x] Si se pierde la última vida con explosiones en curso, estas terminan su animación y aparece "Game over".
+- [x] Al reiniciar con Espacio no queda ninguna explosión en pantalla y hay 60 bloques.
+- [x] No hay errores en la consola y el juego sigue sin módulos ES, bundler ni dependencias externas.
 
 ## Decisiones
 
