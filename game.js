@@ -16,12 +16,15 @@ const MAX_BOUNCE_ANGLE = 60; // grados respecto a la vertical
 
 const MAX_DT = 1 / 30; // limita el delta para evitar saltos
 
+const EXPLOSION_FRAME_COUNT = 4; // longitud de EXPLOSION_FRAMES[color]
+
 const state = {
-  phase: 'ready', // 'ready' | 'playing' | 'gameover' | 'won'
+  phase: 'ready', // 'ready' | 'playing' | 'clearing' | 'gameover' | 'won'
   lives: 3,
   ball: { x: 0, y: 0, vx: 0, vy: 0 },
   paddle: { x: 340 }, // esquina izquierda; y fija en PADDLE.y
   blocks: [], // { x, y, color, alive }
+  explosions: [], // { x, y, color, elapsed } — elapsed en ms desde que empezó
 };
 
 function createBlocks() {
@@ -140,6 +143,7 @@ function bounceOffBlocks() {
     if (overlapX <= 0 || overlapY <= 0) continue;
 
     block.alive = false;
+    state.explosions.push({ x: block.x, y: block.y, color: block.color, elapsed: 0 });
     const ballCx = ball.x + BALL_SIZE / 2;
     const ballCy = ball.y + BALL_SIZE / 2;
     // rebota por el eje de menor penetración
@@ -172,6 +176,7 @@ function loseLife() {
 function restartGame() {
   state.lives = 3;
   state.blocks = createBlocks();
+  state.explosions = [];
   state.phase = 'ready';
   stickBallToPaddle();
 }
@@ -180,7 +185,18 @@ function clampPaddle() {
   state.paddle.x = Math.max(0, Math.min(CANVAS_W - PADDLE.w, state.paddle.x));
 }
 
+function updateExplosions(dt) {
+  for (const explosion of state.explosions) {
+    explosion.elapsed += dt * 1000;
+  }
+  state.explosions = state.explosions.filter(
+    (explosion) => Math.floor(explosion.elapsed / EXPLOSION_DURATION) < EXPLOSION_FRAME_COUNT
+  );
+}
+
 function update(dt) {
+  updateExplosions(dt);
+
   const left = keys.ArrowLeft || keys.KeyA;
   const right = keys.ArrowRight || keys.KeyD;
   state.paddle.x += ((right ? 1 : 0) - (left ? 1 : 0)) * PADDLE.speed * dt;
@@ -195,12 +211,14 @@ function update(dt) {
     bounceOffPaddle();
     bounceOffBlocks();
     if (state.blocks.every((block) => !block.alive)) {
-      state.phase = 'won';
+      state.phase = 'clearing';
       state.ball.vx = 0;
       state.ball.vy = 0;
     } else if (state.ball.y > CANVAS_H) {
       loseLife();
     }
+  } else if (state.phase === 'clearing') {
+    if (state.explosions.length === 0) state.phase = 'won';
   }
 }
 
@@ -211,6 +229,10 @@ function draw() {
     if (block.alive) {
       drawSprite(ctx, 'block_' + block.color, block.x, block.y, BLOCK_W, BLOCK_H);
     }
+  }
+  for (const explosion of state.explosions) {
+    const index = Math.floor(explosion.elapsed / EXPLOSION_DURATION);
+    drawFrame(ctx, EXPLOSION_FRAMES[explosion.color][index], explosion.x, explosion.y, BLOCK_W, BLOCK_H);
   }
   drawSprite(ctx, 'ball', state.ball.x, state.ball.y, BALL_SIZE, BALL_SIZE);
   for (let i = 0; i < state.lives; i++) {
