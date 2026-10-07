@@ -213,11 +213,10 @@ function draw() {
     }
   }
   drawSprite(ctx, 'ball', state.ball.x, state.ball.y, BALL_SIZE, BALL_SIZE);
-  ctx.fillStyle = '#fff';
-  ctx.font = '20px sans-serif';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  ctx.fillText('Vidas: ' + state.lives, 10, 10);
+  for (let i = 0; i < state.lives; i++) {
+    const x = CANVAS_W - 10 - BALL_SIZE - i * (BALL_SIZE + 6);
+    drawSprite(ctx, 'ball', x, 10, BALL_SIZE, BALL_SIZE);
+  }
   if (state.phase === 'gameover' || state.phase === 'won') {
     ctx.fillStyle = '#fff';
     ctx.font = '48px sans-serif';
