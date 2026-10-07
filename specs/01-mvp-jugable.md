@@ -1,6 +1,6 @@
 # SPEC 01 — MVP jugable de Arkanoid
 
-> **Estado:** aprobado
+> **Estado:** Implementado
 > **Depende de:** ninguno (reutiliza `assets/spritesheet.js` y los sonidos existentes)
 > **Fecha:** 2026-10-06
 > **Objetivo:** Una página con un canvas de 800x600 donde se juega un único nivel de Arkanoid con pala, bola, bloques, 3 vidas, game over y victoria.
