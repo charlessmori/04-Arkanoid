@@ -11,7 +11,10 @@ const ROW_COLORS = ['red', 'yellow', 'cyan', 'magenta', 'hotpink', 'green'];
 const PADDLE = { w: 120, h: 16, y: 560, speed: 600 }; // speed: teclado, px/s
 
 const BALL_SIZE = 16;
-const BALL_SPEED = 420; // módulo constante, px/s
+const BALL_SPEED = 420; // velocidad base del nivel 1, px/s
+const BALL_SPEED_STEP = 0.1; // +10 % de BALL_SPEED por nivel
+const BALL_SPEED_MAX = 840; // px/s
+const BLOCK_ROWS_MAX = 10; // 10 filas acaban en y = 380
 const MAX_BOUNCE_ANGLE = 60; // grados respecto a la vertical
 
 const MAX_DT = 1 / 30; // limita el delta para evitar saltos
@@ -21,20 +24,30 @@ const EXPLOSION_FRAME_COUNT = 4; // longitud de EXPLOSION_FRAMES[color]
 const state = {
   phase: 'ready', // 'ready' | 'playing' | 'clearing' | 'gameover' | 'won'
   lives: 3,
+  level: 1,
+  retryUsed: false, // true si el nivel actual ya gastó su segunda oportunidad
   ball: { x: 0, y: 0, vx: 0, vy: 0 },
   paddle: { x: 340 }, // esquina izquierda; y fija en PADDLE.y
   blocks: [], // { x, y, color, alive }
   explosions: [], // { x, y, color, elapsed } — elapsed en ms desde que empezó
 };
 
+function ballSpeed() {
+  return Math.min(BALL_SPEED * (1 + BALL_SPEED_STEP * (state.level - 1)), BALL_SPEED_MAX);
+}
+
+function blockRows() {
+  return Math.min(BLOCK_ROWS + state.level - 1, BLOCK_ROWS_MAX);
+}
+
 function createBlocks() {
   const blocks = [];
-  for (let row = 0; row < BLOCK_ROWS; row++) {
+  for (let row = 0; row < blockRows(); row++) {
     for (let col = 0; col < BLOCK_COLS; col++) {
       blocks.push({
         x: BLOCK_ORIGIN.x + col * BLOCK_W,
         y: BLOCK_ORIGIN.y + row * BLOCK_H,
-        color: ROW_COLORS[row],
+        color: ROW_COLORS[row % ROW_COLORS.length],
         alive: true,
       });
     }
@@ -91,7 +104,7 @@ function launchBall() {
   if (state.phase !== 'ready') return;
   state.phase = 'playing';
   state.ball.vx = 0;
-  state.ball.vy = -BALL_SPEED;
+  state.ball.vy = -ballSpeed();
 }
 
 function bounceOffWalls() {
@@ -128,8 +141,8 @@ function bounceOffPaddle() {
   // -1 en el extremo izquierdo, 0 en el centro, 1 en el extremo derecho
   const offset = (ball.x + BALL_SIZE / 2 - (paddle.x + PADDLE.w / 2)) / (PADDLE.w / 2);
   const angle = Math.max(-1, Math.min(1, offset)) * MAX_BOUNCE_ANGLE * Math.PI / 180;
-  ball.vx = BALL_SPEED * Math.sin(angle);
-  ball.vy = -BALL_SPEED * Math.cos(angle);
+  ball.vx = ballSpeed() * Math.sin(angle);
+  ball.vy = -ballSpeed() * Math.cos(angle);
   ball.y = PADDLE.y - BALL_SIZE;
   playSound(bounceSound);
 }
@@ -174,6 +187,15 @@ function loseLife() {
 }
 
 function restartGame() {
+  if (state.phase === 'won') {
+    state.level += 1;
+    state.retryUsed = false;
+  } else if (state.retryUsed) {
+    state.level = 1;
+    state.retryUsed = false;
+  } else {
+    state.retryUsed = true;
+  }
   state.lives = 3;
   state.blocks = createBlocks();
   state.explosions = [];
@@ -239,6 +261,11 @@ function draw() {
     const x = CANVAS_W - 10 - BALL_SIZE - i * (BALL_SIZE + 6);
     drawSprite(ctx, 'ball', x, 10, BALL_SIZE, BALL_SIZE);
   }
+  ctx.fillStyle = '#fff';
+  ctx.font = '20px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText('Nivel ' + state.level, 10, 10);
   if (state.phase === 'gameover' || state.phase === 'won') {
     ctx.fillStyle = '#fff';
     ctx.font = '48px sans-serif';
@@ -246,7 +273,11 @@ function draw() {
     ctx.textBaseline = 'middle';
     ctx.fillText(state.phase === 'won' ? 'Has ganado' : 'Game over', CANVAS_W / 2, CANVAS_H / 2);
     ctx.font = '20px sans-serif';
-    ctx.fillText('Pulsa Espacio para jugar de nuevo', CANVAS_W / 2, CANVAS_H / 2 + 50);
+    let hint;
+    if (state.phase === 'won') hint = 'Pulsa Espacio para el nivel ' + (state.level + 1);
+    else if (state.retryUsed) hint = 'Pulsa Espacio para volver al nivel 1';
+    else hint = 'Pulsa Espacio para reintentar el nivel ' + state.level;
+    ctx.fillText(hint, CANVAS_W / 2, CANVAS_H / 2 + 50);
   }
   drawSprite(ctx, 'paddle', state.paddle.x, PADDLE.y, PADDLE.w, PADDLE.h);
 }

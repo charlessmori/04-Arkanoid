@@ -1,6 +1,6 @@
 # SPEC 03 — Dificultad ascendente por victorias consecutivas
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 01, SPEC 02
 > **Fecha:** 2026-10-07
 > **Objetivo:** Cada victoria consecutiva sube un nivel de dificultad (bola un 10 % más rápida y una fila más de bloques), con una segunda oportunidad en el nivel actual tras un game over y regreso al nivel 1 si se vuelve a perder.
@@ -81,21 +81,21 @@ En los tres casos: vidas a 3, bloques regenerados con `createBlocks()`, explosio
 
 ## Criterios de aceptación
 
-- [ ] Al cargar la página el juego empieza en "Nivel 1" con 6 filas de bloques y la bola a 420 px/s.
-- [ ] "Nivel N" es visible en el canvas en las fases `ready`, `playing`, `clearing`, `gameover` y `won`.
-- [ ] Tras ganar y pulsar Espacio, el nivel sube en 1, las vidas son 3 y la cuadrícula tiene una fila más que en el nivel anterior.
-- [ ] La velocidad de la bola en el nivel N es `420 * (1 + 0.1 * (N - 1))` px/s: 462 en el nivel 2 y 504 en el nivel 3.
-- [ ] La velocidad de la bola nunca supera 840 px/s, aunque el nivel sea mayor que 11.
-- [ ] La cuadrícula nunca supera 10 filas, aunque el nivel sea mayor que 5.
-- [ ] Las filas añadidas por encima de la sexta repiten los colores de `ROW_COLORS` desde el primero.
-- [ ] La velocidad de la bola es la misma antes y después de cada rebote en pala, paredes y bloques, dentro de un mismo nivel.
-- [ ] Tras el primer game over de un nivel, Espacio reinicia ese mismo nivel con 3 vidas y bloques completos.
-- [ ] Si se pierde esa segunda oportunidad, la pantalla indica la vuelta al nivel 1 y Espacio empieza en el nivel 1 con 6 filas y 420 px/s.
-- [ ] Ganar tras una segunda oportunidad sube el nivel con normalidad, y un game over posterior vuelve a dar una segunda oportunidad.
-- [ ] Un game over en el nivel 1 también concede una segunda oportunidad en el nivel 1.
-- [ ] Recargar la página reinicia en el nivel 1.
-- [ ] No hay errores en la consola y el juego sigue sin módulos ES, bundler ni dependencias externas.
-- [ ] `git status` no muestra cambios en `assets/`.
+- [x] Al cargar la página el juego empieza en "Nivel 1" con 6 filas de bloques y la bola a 420 px/s.
+- [x] "Nivel N" es visible en el canvas en las fases `ready`, `playing`, `clearing`, `gameover` y `won`.
+- [x] Tras ganar y pulsar Espacio, el nivel sube en 1, las vidas son 3 y la cuadrícula tiene una fila más que en el nivel anterior.
+- [x] La velocidad de la bola en el nivel N es `420 * (1 + 0.1 * (N - 1))` px/s: 462 en el nivel 2 y 504 en el nivel 3.
+- [x] La velocidad de la bola nunca supera 840 px/s, aunque el nivel sea mayor que 11.
+- [x] La cuadrícula nunca supera 10 filas, aunque el nivel sea mayor que 5.
+- [x] Las filas añadidas por encima de la sexta repiten los colores de `ROW_COLORS` desde el primero.
+- [x] La velocidad de la bola es la misma antes y después de cada rebote en pala, paredes y bloques, dentro de un mismo nivel.
+- [x] Tras el primer game over de un nivel, Espacio reinicia ese mismo nivel con 3 vidas y bloques completos.
+- [x] Si se pierde esa segunda oportunidad, la pantalla indica la vuelta al nivel 1 y Espacio empieza en el nivel 1 con 6 filas y 420 px/s.
+- [0] Ganar tras una segunda oportunidad sube el nivel con normalidad, y un game over posterior vuelve a dar una segunda oportunidad.
+- [0] Un game over en el nivel 1 también concede una segunda oportunidad en el nivel 1.
+- [0] Recargar la página reinicia en el nivel 1.
+- [0] No hay errores en la consola y el juego sigue sin módulos ES, bundler ni dependencias externas.
+- [0] `git status` no muestra cambios en `assets/`.
 
 ## Decisiones
 
